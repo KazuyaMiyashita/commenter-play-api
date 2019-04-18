@@ -1,7 +1,15 @@
 ---- drop ----
-DROP TABLE IF EXISTS `users`;
+drop table if exists `auths`;
+drop table if exists `users`;
 
 ---- create ----
+create table if not exists `auths`
+(
+  `username`  char(256) unique not null,
+  `password`  char(60) not null,
+  primary key (`username`)
+)
+
 create table IF not exists `users`
 (
  `id`               INT(20) AUTO_INCREMENT,

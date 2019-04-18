@@ -10,6 +10,14 @@ scalaVersion := "2.12.8"
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
 
+libraryDependencies += "org.springframework.security" % "spring-security-web" % "5.1.5.RELEASE"
+
+libraryDependencies ++= Seq(
+  "mysql" % "mysql-connector-java" % "8.0.15",
+  "org.scalikejdbc" %% "scalikejdbc" % "3.3.2",
+  "ch.qos.logback" % "logback-classic" % "1.2.3"
+)
+
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.example.controllers._"
 
