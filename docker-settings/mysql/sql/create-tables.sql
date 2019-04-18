@@ -8,7 +8,7 @@ create table if not exists `auths`
   `username`  char(256) unique not null,
   `password`  char(60) not null,
   primary key (`username`)
-)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 create table IF not exists `users`
 (

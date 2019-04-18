@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mysql:8.0.15
+    image: mysql:5.7
     container_name: commenter_mysql
     volumes:
       - ./docker/mysql:/var/lib/mysql
