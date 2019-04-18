@@ -1,0 +1,19 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    container_name: commenter_mysql
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    environment:
+      - "MYSQL_DATABASE=commenter"
+      - "MYSQL_ALLOW_EMPTY_PASSWORD=yes"
+      - "MYSQL_USER: docker"
+      - "MYSQL_PASSWORD: docker"
+      - "TZ: 'Asia/Tokyo'"
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker-settings/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker-settings/mysql/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
