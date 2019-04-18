@@ -13,8 +13,10 @@ import v0.models.forms.AuthForm
 import v0.models.tables.AuthsTable
 
 @Singleton
-class AuthsController @Inject()(cc: ControllerComponents)
+class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
+
+  val authsTable = new AuthsTable(config)
 
   def get() = Action { implicit request: Request[AnyContent] =>
     Ok("v0.AuthsController.get")
@@ -23,7 +25,7 @@ class AuthsController @Inject()(cc: ControllerComponents)
   def save() = Action { implicit request: Request[AnyContent] =>
     AuthForm.form.bindFromRequest().fold(
       badForm => BadRequest(badForm.errorsAsJson),
-      form => (AuthsTable.save(form): Try[Int]) match {
+      form => (authsTable.save(form): Try[Int]) match {
         case Success(s) => Ok(s.toString)
         case Failure(f) => InternalServerError(f.toString)
       }

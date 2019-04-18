@@ -1,5 +1,7 @@
 package v0.models.tables
 
+import play.api.Configuration
+
 import scalikejdbc._
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
@@ -7,9 +9,13 @@ import util.Try
 
 import v0.models.forms.AuthForm
 
-object AuthsTable {
+class AuthsTable(private val config: Configuration) {
 
-  ConnectionPool.singleton("jdbc:mysql://127.0.0.1:3306/commenter", "root", "")
+  ConnectionPool.singleton(
+    config.get[String]("db.url"),
+    config.get[String]("db.username"),
+    config.get[String]("db.password")
+  )
   implicit val session = AutoSession
 
   val bcrypt = new BCryptPasswordEncoder()
