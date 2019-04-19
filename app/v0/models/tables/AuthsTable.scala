@@ -27,4 +27,6 @@ class AuthsTable(private val config: Configuration) {
     sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})".update.apply()
   }
 
+  // def login(data: AuthForm): 
+
 }

@@ -12,6 +12,8 @@ import v0.models.entities.Auth
 import v0.models.forms.AuthForm
 import v0.models.tables.AuthsTable
 
+import v0.models.entities.DisplayErrorAsJson
+
 @Singleton
 class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
@@ -27,9 +29,13 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
       badForm => BadRequest(badForm.errorsAsJson),
       form => (authsTable.save(form): Try[Int]) match {
         case Success(s) => Ok(s.toString)
-        case Failure(f) => InternalServerError(f.toString)
+        case Failure(f) => InternalServerError(new DisplayErrorAsJson(f).toJson)
       }
     )
+  }
+
+  def login() = Action { implicit request: Request[AnyContent] =>
+    ???
   }
 
 }
