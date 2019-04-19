@@ -37,7 +37,13 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
   }
 
   def login() = Action { implicit request: Request[AnyContent] =>
-    ???
+    AuthForm.form.bindFromRequest().fold(
+      badForm => BadRequest(badForm.errorsAsJson),
+      form => (authsTable.login(form): Option[String]) match {
+        case Some(token) => Ok(token)
+        case None => Forbidden
+      }
+    )
   }
 
 }
