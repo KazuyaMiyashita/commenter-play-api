@@ -1,4 +1,4 @@
-package v0.models.entities
+package v0.views
 
 import play.api.libs.json.Json
 

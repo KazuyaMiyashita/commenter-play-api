@@ -8,11 +8,12 @@ import play.api.i18n.I18nSupport
 
 import util.{Try, Success, Failure}
 
-import v0.models.entities.Auth
-import v0.models.forms.AuthForm
-import v0.models.tables._
+import v0._
 
-import v0.models.entities.DisplayErrorAsJson
+import models.entities.Auth
+import models.forms.AuthForm
+import models.tables._
+import views.auths.LoginView
 
 @Singleton
 class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
@@ -30,8 +31,8 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
       form => (authsTable.save(form): Try[Unit]) match {
         case Success(_) => Ok
         case Failure(f: java.sql.SQLIntegrityConstraintViolationException) =>
-          Conflict(new DisplayErrorAsJson(f).toJson)
-        case Failure(f) => InternalServerError(new DisplayErrorAsJson(f).toJson)
+          Conflict(LoginView.onError(f))
+        case Failure(f) => InternalServerError(LoginView.onError(f))
       }
     )
   }
@@ -40,10 +41,10 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
     AuthForm.form.bindFromRequest().fold(
       badForm => BadRequest(badForm.errorsAsJson),
       form => (authsTable.login(form): Try[String]) match {
-        case Success(token) => Ok(token)
-        case Failure(e: NonExistUserException) => Forbidden(new DisplayErrorAsJson(e).toJson)
-        case Failure(e: InvalidPasswordException) => Forbidden(new DisplayErrorAsJson(e).toJson)
-        case Failure(e) => InternalServerError(new DisplayErrorAsJson(e).toJson)
+        case Success(token) => Ok(LoginView.onOK(token))
+        case Failure(e: NonExistUserException) => Forbidden(LoginView.onError(e))
+        case Failure(e: InvalidPasswordException) => Forbidden(LoginView.onError(e))
+        case Failure(e) => InternalServerError(LoginView.onError(e))
       }
     )
   }
