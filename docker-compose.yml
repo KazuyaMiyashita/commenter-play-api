@@ -6,3 +6,5 @@ services:
       - ./mysql/db:/docker-entrypoint-initdb.d  #初期データ
     environment:
       - MYSQL_ROOT_PASSWORD=root   #環境変数
+    ports:
+      - "3306:3306"
