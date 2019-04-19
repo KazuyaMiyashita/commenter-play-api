@@ -1,8 +1,8 @@
----- drop ----
+# drop
 drop table if exists `auths`;
 drop table if exists `users`;
 
----- create ----
+# create
 create table if not exists `auths`
 (
   `username`  char(256) unique not null,

@@ -8,4 +8,4 @@ target
 /RUNNING_PID
 
 # Docker
-/docker/mysql/*
+# /docker/mysql/*
