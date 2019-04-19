@@ -10,7 +10,7 @@ import util.{Try, Success, Failure}
 
 import v0.models.entities.Auth
 import v0.models.forms.AuthForm
-import v0.models.tables.AuthsTable
+import v0.models.tables._
 
 import v0.models.entities.DisplayErrorAsJson
 
@@ -39,9 +39,11 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
   def login() = Action { implicit request: Request[AnyContent] =>
     AuthForm.form.bindFromRequest().fold(
       badForm => BadRequest(badForm.errorsAsJson),
-      form => (authsTable.login(form): Option[String]) match {
-        case Some(token) => Ok(token)
-        case None => Forbidden
+      form => (authsTable.login(form): Try[String]) match {
+        case Success(token) => Ok(token)
+        case Failure(e: NonExistUserException) => Forbidden(new DisplayErrorAsJson(e).toJson)
+        case Failure(e: InvalidPasswordException) => Forbidden(new DisplayErrorAsJson(e).toJson)
+        case Failure(e) => InternalServerError(new DisplayErrorAsJson(e).toJson)
       }
     )
   }

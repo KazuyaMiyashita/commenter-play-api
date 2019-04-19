@@ -5,7 +5,7 @@ import play.api.Configuration
 import scalikejdbc._
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
-import util.Try
+import util.{Try, Success, Failure}
 
 import v0.models.entities.Auth
 import v0.models.forms.AuthForm
@@ -36,29 +36,38 @@ class AuthsTable(private val config: Configuration) {
     sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})".update.apply()
   }
 
-  def login(form: AuthForm): Option[String] = {
+  def login(form: AuthForm): Try[String] = {
     val username = form.username
     val rawPassword = form.password
-    val entityOpt: Option[Auth] = sql"select username, password from auths where username = ${username}"
-      .map(rs => mkAuthEntity(rs))
-      .single.apply()
 
-    val token: Option[String] = entityOpt flatMap { entity =>
-      val hashedPassword = entity.password
-      if (authenticate(rawPassword, hashedPassword)) Some(entity)
-      else None
-    } map { entity =>
-      val token = AuthsTable.createToken(java.util.Calendar.getInstance.getTimeInMillis, username)
-
-      // DBへの追加処理
-
-      token
+    Try {
+      sql"select username, password from auths where username = ${username}"
+        .map(rs => mkAuthEntity(rs))
+        .single.apply()
+    } flatMap { 
+      case Some(entity) => Success(entity)
+      case None => Failure(new NonExistUserException(username))
+    } flatMap {
+      case entity: Auth => {
+        val hashedPassword = entity.password
+        if (authenticate(rawPassword, hashedPassword)) Success(entity)
+        else Failure(new InvalidPasswordException)
+      }
+    } flatMap {
+      case entity: Auth => Try {
+        val token = AuthsTable.createToken(java.util.Calendar.getInstance.getTimeInMillis, username)
+        sql"insert into tokens (token, auth_username, created_at) values (${token}, ${username}, current_timestamp)".update.apply()
+        token
+      }
     }
 
-    token
   }
 
 }
+
+class AuthsTableException extends Exception
+class NonExistUserException(username: String) extends AuthsTableException
+class InvalidPasswordException extends AuthsTableException
 
 object AuthsTable {
 

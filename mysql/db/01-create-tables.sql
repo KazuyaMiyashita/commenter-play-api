@@ -16,10 +16,10 @@ create table if not exists `auths`
 
 create table if not exists `tokens`
 (
+  `token`           char(255) unique not null,
   `auth_username`   char(255) not null,
-  `token`           char(255) not null,
-  `created_at`      datetime not null,
-  index (`token`)
+  `created_at`      timestamp not null,
+  primary key (`token`)
 );
 
 
@@ -27,7 +27,5 @@ create table IF not exists `users`
 (
  `id`               INT(20) AUTO_INCREMENT,
  `name`             VARCHAR(20) NOT NULL,
- `created_at`       Datetime DEFAULT NULL,
- `updated_at`       Datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
