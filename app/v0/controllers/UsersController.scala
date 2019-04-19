@@ -5,7 +5,6 @@ import play.api._
 import play.api.mvc._
 
 import v0.models.entities.User
-import v0.models.forms.User
 
 @Singleton
 class UsersController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
