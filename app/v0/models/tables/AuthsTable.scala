@@ -21,7 +21,7 @@ class AuthsTable(private val config: Configuration) {
   val bcrypt = new BCryptPasswordEncoder()
   def createHash(password: String): String = bcrypt.encode(password)
 
-  def save(data: AuthForm): Try[Int] = Try {
+  def save(data: AuthForm): Try[Unit] = Try {
     val username = data.username
     val hashedPassword = createHash(data.password)
     sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})".update.apply()
