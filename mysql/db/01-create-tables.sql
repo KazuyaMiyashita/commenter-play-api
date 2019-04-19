@@ -1,3 +1,6 @@
+create database if not exists `commenter`;
+use `commenter`;
+
 # drop
 drop table if exists `auths`;
 drop table if exists `users`;
@@ -5,10 +8,10 @@ drop table if exists `users`;
 # create
 create table if not exists `auths`
 (
-  `username`  char(256) unique not null,
+  `username`  char(255) unique not null,
   `password`  char(60) not null,
   primary key (`username`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+);
 
 create table IF not exists `users`
 (
@@ -17,4 +20,4 @@ create table IF not exists `users`
  `created_at`       Datetime DEFAULT NULL,
  `updated_at`       Datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+);
