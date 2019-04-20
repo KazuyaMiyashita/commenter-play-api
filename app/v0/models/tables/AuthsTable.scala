@@ -33,7 +33,8 @@ class AuthsTable(private val config: Configuration) {
   def save(data: AuthForm): Try[Unit] = Try {
     val username = data.username
     val hashedPassword = createHash(data.password)
-    sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})".update.apply()
+    sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})"
+      .update.apply()
   }
 
   def login(form: AuthForm): Try[String] = {
@@ -56,7 +57,8 @@ class AuthsTable(private val config: Configuration) {
     } flatMap {
       case entity: Auth => Try {
         val token = AuthsTable.createToken(java.util.Calendar.getInstance.getTimeInMillis, username)
-        sql"insert into tokens (token, auth_username, created_at) values (${token}, ${username}, current_timestamp)".update.apply()
+        sql"insert into tokens (token, auth_username, created_at) values (${token}, ${username}, current_timestamp)"
+          .update.apply()
         token
       }
     }

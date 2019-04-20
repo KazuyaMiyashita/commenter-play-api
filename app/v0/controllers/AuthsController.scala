@@ -18,7 +18,7 @@ import views.auths._
 
 @Singleton
 class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
-  extends AbstractController(cc) with I18nSupport{
+  extends AbstractController(cc) with I18nSupport {
 
   val authsTable = new AuthsTable(config)
 
