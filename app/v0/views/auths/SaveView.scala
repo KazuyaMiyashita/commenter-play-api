@@ -2,11 +2,12 @@ package v0.views.auths
 
 import play.api.data.Form
 import play.api.libs.json._
+import play.api.i18n.MessagesProvider
 
 import v0._
 import models.forms.AuthForm
 
-object SaveView {
+class SaveView(implicit messageProvider: MessagesProvider) {
 
   def onOK(token: String): JsValue = Json.obj(
     "token" -> token
@@ -17,11 +18,9 @@ object SaveView {
   )
 
   def onFormError(badForm: Form[AuthForm]): JsValue = {
-    // badForm.errorsAsJson
-    Json.arr(badForm.errors.map(err => Json.obj(
-      "key" -> err.key,
-      "messages" -> err.messages
-    )))
+    Json.obj(
+      "error" -> badForm.errorsAsJson
+    )
   }
 
 }

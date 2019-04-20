@@ -4,6 +4,8 @@ import javax.inject._
 import play.api._
 import play.api.mvc._
 
+import play.api.i18n.I18nSupport
+
 import util.{Try, Success, Failure}
 
 import v0._
@@ -16,7 +18,7 @@ import views.auths._
 
 @Singleton
 class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
-  extends AbstractController(cc){
+  extends AbstractController(cc) with I18nSupport{
 
   val authsTable = new AuthsTable(config)
 
@@ -25,25 +27,27 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
   }
 
   def save() = Action { implicit request: Request[AnyContent] =>
+    val saveView = new SaveView
     AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(SaveView.onFormError(badForm)),
+      badForm => BadRequest(saveView.onFormError(badForm)),
       form => (authsTable.save(form): Try[Unit]) match {
         case Success(_) => Ok
         case Failure(f: java.sql.SQLIntegrityConstraintViolationException) =>
-          Conflict(SaveView.onError(f))
-        case Failure(f) => InternalServerError(SaveView.onError(f))
+          Conflict(saveView.onError(f))
+        case Failure(f) => InternalServerError(saveView.onError(f))
       }
     )
   }
 
   def login() = Action { implicit request: Request[AnyContent] =>
+    val loginView = new LoginView
     AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(SaveView.onFormError(badForm)),
+      badForm => BadRequest(loginView.onFormError(badForm)),
       form => (authsTable.login(form): Try[String]) match {
-        case Success(token) => Ok(LoginView.onOK(token))
-        case Failure(e: NonExistUserException) => Forbidden(LoginView.onError(e))
-        case Failure(e: InvalidPasswordException) => Forbidden(LoginView.onError(e))
-        case Failure(e) => InternalServerError(LoginView.onError(e))
+        case Success(token) => Ok(loginView.onOK(token))
+        case Failure(e: NonExistUserException) => Forbidden(loginView.onError(e))
+        case Failure(e: InvalidPasswordException) => Forbidden(loginView.onError(e))
+        case Failure(e) => InternalServerError(loginView.onError(e))
       }
     )
   }
