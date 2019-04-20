@@ -18,3 +18,5 @@ package v0.models.forms
 //   )
 
 // }
+
+object UserForm

@@ -29,33 +29,32 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
 
   def save() = Action { implicit request: Request[AnyContent] =>
     val saveView = new SaveView
-    bindFromRequest(AuthForm.form) match {
-      case Left(badForm) => BadRequest(saveView.onFormError(badForm))
-      case Right(form) => (authsTable.save(form): Try[Unit]) match {
-        case Success(_) => Ok
-        case Failure(f: java.sql.SQLIntegrityConstraintViolationException) =>
-          Conflict(saveView.onError(f))
-        case Failure(f) => InternalServerError(saveView.onError(f))
-      }
-    }
+    (bindFromRequest(AuthForm.form) match {
+      case Right(form) => Right(authsTable.save(form))
+      case Left(badForm) => Left(BadRequest(saveView.onFormError(badForm)))
+    }) flatMap {
+      case Success(_) => Right(Ok)
+      case Failure(f: java.sql.SQLIntegrityConstraintViolationException) => Left(Conflict(saveView.onError(f)))
+      case Failure(f) => Left(InternalServerError(saveView.onError(f)))
+    } merge
   }
 
   def login() = Action { implicit request: Request[AnyContent] =>
     val loginView = new LoginView
-    bindFromRequest(AuthForm.form) match {
-      case Left(badForm) => BadRequest(loginView.onFormError(badForm))
-      case Right(form) => (authsTable.login(form): Try[String]) match {
-        case Success(token) => Ok(loginView.onOK(token))
-        case Failure(e: NonExistUserException) => Forbidden(loginView.onError(e))
-        case Failure(e: InvalidPasswordException) => Forbidden(loginView.onError(e))
-        case Failure(e) => InternalServerError(loginView.onError(e))
-      }
-    }
+    (bindFromRequest(AuthForm.form) match {
+      case Right(form) => Right(authsTable.login(form))
+      case Left(badForm) => Left(BadRequest(loginView.onFormError(badForm)))
+    }).flatMap {
+      case Success(token) => Right(Ok(loginView.onOK(token)))
+      case Failure(e: NonExistUserException) => Left(Forbidden(loginView.onError(e)))
+      case Failure(e: InvalidPasswordException) => Left(Forbidden(loginView.onError(e)))
+      case Failure(e) => Left(InternalServerError(loginView.onError(e)))
+    } merge
   }
 
   def logout() = Action { implicit request: Request[AnyContent] =>
     val logoutView = new LogoutView
-    (authsTable.logout(): Try[Unit]) match {
+    (authsTable.logout()) match {
       case Success(_) => Ok
       case Failure(e) => InternalServerError(logoutView.onError(e))
     }
