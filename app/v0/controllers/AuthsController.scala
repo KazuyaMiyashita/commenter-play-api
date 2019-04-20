@@ -4,8 +4,6 @@ import javax.inject._
 import play.api._
 import play.api.mvc._
 
-import play.api.i18n.I18nSupport
-
 import util.{Try, Success, Failure}
 
 import v0._
@@ -13,11 +11,12 @@ import v0._
 import models.entities.Auth
 import models.forms.AuthForm
 import models.tables._
-import views.auths.LoginView
+import views.auths._
+
 
 @Singleton
 class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
-  extends AbstractController(cc) with I18nSupport {
+  extends AbstractController(cc){
 
   val authsTable = new AuthsTable(config)
 
@@ -27,19 +26,19 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
 
   def save() = Action { implicit request: Request[AnyContent] =>
     AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(badForm.errorsAsJson),
+      badForm => BadRequest(SaveView.onFormError(badForm)),
       form => (authsTable.save(form): Try[Unit]) match {
         case Success(_) => Ok
         case Failure(f: java.sql.SQLIntegrityConstraintViolationException) =>
-          Conflict(LoginView.onError(f))
-        case Failure(f) => InternalServerError(LoginView.onError(f))
+          Conflict(SaveView.onError(f))
+        case Failure(f) => InternalServerError(SaveView.onError(f))
       }
     )
   }
 
   def login() = Action { implicit request: Request[AnyContent] =>
     AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(badForm.errorsAsJson),
+      badForm => BadRequest(SaveView.onFormError(badForm)),
       form => (authsTable.login(form): Try[String]) match {
         case Success(token) => Ok(LoginView.onOK(token))
         case Failure(e: NonExistUserException) => Forbidden(LoginView.onError(e))
