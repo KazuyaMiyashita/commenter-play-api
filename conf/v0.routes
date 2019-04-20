@@ -1,3 +1,6 @@
+
+GET     /auths                    v0.controllers.AuthsController.get
+
 POST    /auths                    v0.controllers.AuthsController.save
 POST    /auths/login              v0.controllers.AuthsController.login
 POST    /auths/logout             v0.controllers.AuthsController.logout

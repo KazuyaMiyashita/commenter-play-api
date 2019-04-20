@@ -20,10 +20,6 @@ class AuthsTable(private val config: Configuration) {
   implicit val session = AutoSession
 
   import AuthsTable._
-  // def authenticate(password: String): Boolean = {
-  //   val hashString = fromDB()
-  //   bcrypt.matches(password, hashString)
-  // }
 
   private def mkAuthEntity(rs: WrappedResultSet) = Auth(
     username = rs.get("username"),
