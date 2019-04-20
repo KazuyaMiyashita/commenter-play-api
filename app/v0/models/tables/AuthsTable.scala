@@ -62,6 +62,9 @@ class AuthsTable(private val config: Configuration) {
         token
       }
     }
+  }
+
+  def logout(): Try[Unit] = Try {
 
   }
 

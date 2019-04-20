@@ -14,6 +14,7 @@ import models.entities.Auth
 import models.forms.AuthForm
 import models.tables._
 import views.auths._
+import utils.ControllerUtils._
 
 
 @Singleton
@@ -28,28 +29,36 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
 
   def save() = Action { implicit request: Request[AnyContent] =>
     val saveView = new SaveView
-    AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(saveView.onFormError(badForm)),
-      form => (authsTable.save(form): Try[Unit]) match {
+    bindFromRequest(AuthForm.form) match {
+      case Left(badForm) => BadRequest(saveView.onFormError(badForm))
+      case Right(form) => (authsTable.save(form): Try[Unit]) match {
         case Success(_) => Ok
         case Failure(f: java.sql.SQLIntegrityConstraintViolationException) =>
           Conflict(saveView.onError(f))
         case Failure(f) => InternalServerError(saveView.onError(f))
       }
-    )
+    }
   }
 
   def login() = Action { implicit request: Request[AnyContent] =>
     val loginView = new LoginView
-    AuthForm.form.bindFromRequest().fold(
-      badForm => BadRequest(loginView.onFormError(badForm)),
-      form => (authsTable.login(form): Try[String]) match {
+    bindFromRequest(AuthForm.form) match {
+      case Left(badForm) => BadRequest(loginView.onFormError(badForm))
+      case Right(form) => (authsTable.login(form): Try[String]) match {
         case Success(token) => Ok(loginView.onOK(token))
         case Failure(e: NonExistUserException) => Forbidden(loginView.onError(e))
         case Failure(e: InvalidPasswordException) => Forbidden(loginView.onError(e))
         case Failure(e) => InternalServerError(loginView.onError(e))
       }
-    )
+    }
+  }
+
+  def logout() = Action { implicit request: Request[AnyContent] =>
+    val logoutView = new LogoutView
+    (authsTable.logout(): Try[Unit]) match {
+      case Success(_) => Ok
+      case Failure(e) => InternalServerError(logoutView.onError(e))
+    }
   }
 
 }
