@@ -9,23 +9,28 @@ drop table if exists `users`;
 # create
 create table if not exists `auths`
 (
-  `username`  char(255) unique not null,
-  `password`  char(60) not null,
-  primary key (`username`)
+  `id`              char(64) unique not null,
+  `email`           char(255) unique not null,
+  `password`        char(60) not null,
+  primary key (`id`),
+  index (`email`)
 );
 
 create table if not exists `tokens`
 (
   `token`           char(255) unique not null,
-  `auth_username`   char(255) not null,
+  `auth_id`         char(255) not null,
   `created_at`      timestamp not null,
-  primary key (`token`)
+  primary key (`token`),
+  foreign key (`auth_id`) references `auths`(`id`)
 );
 
 
-create table IF not exists `users`
+create table if not exists `users`
 (
- `id`               INT(20) AUTO_INCREMENT,
- `name`             VARCHAR(20) NOT NULL,
-    PRIMARY KEY (`id`)
+  `id`               char(64) unique not null,
+  `auth_id`          char(64) unique not null,
+  `name`             VARCHAR(32) NOT NULL,
+  primary key (`id`),
+  foreign key (`auth_id`) references `auths`(`id`)
 );

@@ -3,12 +3,14 @@ package v0.models.tables
 import play.api.Configuration
 
 import scalikejdbc._
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import de.huxhorn.sulky.ulid.ULID;
 
 import util.{Try, Success, Failure}
 
 import v0.models.entities.Auth
-import v0.models.forms.AuthForm
+import v0.models.forms.{CreateUserForm, AuthLoginForm}
 
 class AuthsTable(private val config: Configuration) {
 
@@ -21,39 +23,46 @@ class AuthsTable(private val config: Configuration) {
 
   import AuthsTable._
 
-  private def mkAuthEntity(rs: WrappedResultSet) = Auth(
-    username = rs.get("username"),
-    password = rs.get("password")
-  )
-
-  def save(data: AuthForm): Try[Unit] = Try {
-    val username = data.username
-    val hashedPassword = createHash(data.password)
-    sql"insert into auths (username, password) values (${data.username}, ${hashedPassword})"
+  def save(form: CreateUserForm): Try[Unit] = Try {
+    val auth_id: String = createULID
+    val email = form.email
+    val hashedPassword = createHash(form.rawPassword)
+    val user_id: String = createULID
+    val name = form.name
+    sql"insert into auths (id, email, password) values (${auth_id}, ${email}, ${hashedPassword})"
+      .update.apply()
+    sql"insert into users (id, auth_id, name) values (${user_id}, ${auth_id}, ${name})"
       .update.apply()
   }
 
-  def login(form: AuthForm): Try[String] = {
-    val username = form.username
-    val rawPassword = form.password
+  def login(form: AuthLoginForm): Try[String] = {
+    def mkAuthEntity(rs: WrappedResultSet) = Auth(
+      id = rs.get("id"),
+      email = rs.get("email"),
+      hashedPassword = rs.get("password")
+    )
+
+    val email = form.email
+    val rawPassword = form.rawPassword
 
     Try {
-      sql"select username, password from auths where username = ${username}"
+      sql"select id, email, password from auths where email = ${email}"
         .map(rs => mkAuthEntity(rs))
         .single.apply()
     } flatMap { 
       case Some(entity) => Success(entity)
-      case None => Failure(new NonExistUserException(username))
+      case None => Failure(new NonExistUserException(email))
     } flatMap {
       case entity: Auth => {
-        val hashedPassword = entity.password
+        val hashedPassword = entity.hashedPassword
         if (authenticate(rawPassword, hashedPassword)) Success(entity)
         else Failure(new InvalidPasswordException)
       }
     } flatMap {
       case entity: Auth => Try {
-        val token = AuthsTable.createToken(java.util.Calendar.getInstance.getTimeInMillis, username)
-        sql"insert into tokens (token, auth_username, created_at) values (${token}, ${username}, current_timestamp)"
+        val auth_id = entity.id
+        val token = AuthsTable.createToken(java.util.Calendar.getInstance.getTimeInMillis, email)
+        sql"insert into tokens (token, auth_id, created_at) values (${token}, ${auth_id}, current_timestamp)"
           .update.apply()
         token
       }
@@ -77,6 +86,8 @@ object AuthsTable {
   def authenticate(rawPassword: String, hashedPassword: String): Boolean =
     bcrypt.matches(rawPassword, hashedPassword)
 
+  def createULID: String = (new ULID).nextULID
+
   def createToken(currentTimeMills: Long, anotherSeed: Any): String = {
     import util.Random
     val rnd = new Random
@@ -85,14 +96,13 @@ object AuthsTable {
     val ts = (('A' to 'Z').toList :::
       ('a' to 'z').toList :::
       ('0' to '9').toList :::
-      List('=', '.', '_', '~', '+', '/'))
+      List('-', '.', '_', '~', '+', '/'))
       .toArray
 
     val tsLen = ts.length
-    val length = 32
+    val length = 64
 
     "Bearer " + List.fill(length)(ts(rnd.nextInt(tsLen))).mkString
-    
   }
 
 

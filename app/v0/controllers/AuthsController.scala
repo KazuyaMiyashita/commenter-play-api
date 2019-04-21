@@ -11,9 +11,9 @@ import util.{Try, Success, Failure}
 import v0._
 
 import models.entities.Auth
-import models.forms.AuthForm
+import models.forms.{CreateUserForm, AuthLoginForm}
 import models.tables._
-import views.auths._
+import views.auths.{SaveView, LoginView, LogoutView}
 import utils.ControllerUtils._
 
 
@@ -29,7 +29,7 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
 
   def save() = Action { implicit request: Request[AnyContent] =>
     val saveView = new SaveView
-    (bindFromRequest(AuthForm.form) match {
+    (bindFromRequest(CreateUserForm.form) match {
       case Right(form) => Right(authsTable.save(form))
       case Left(badForm) => Left(BadRequest(saveView.onFormError(badForm)))
     }) flatMap {
@@ -41,7 +41,7 @@ class AuthsController @Inject()(config: Configuration, cc: ControllerComponents)
 
   def login() = Action { implicit request: Request[AnyContent] =>
     val loginView = new LoginView
-    (bindFromRequest(AuthForm.form) match {
+    (bindFromRequest(AuthLoginForm.form) match {
       case Right(form) => Right(authsTable.login(form))
       case Left(badForm) => Left(BadRequest(loginView.onFormError(badForm)))
     }).flatMap {

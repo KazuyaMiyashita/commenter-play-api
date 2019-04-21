@@ -1,20 +1,39 @@
 package v0.models.forms
 
-case class AuthForm(
-  username: String,
-  password: String
+import play.api.data.Form
+import play.api.data.Forms._
+
+case class AuthLoginForm(
+  email: String,
+  rawPassword: String
 )
 
-object AuthForm {
+object AuthLoginForm {
 
-  import play.api.data.Form
-  import play.api.data.Forms._
-
-  val form: Form[AuthForm] = Form(
+  val form: Form[AuthLoginForm] = Form(
     mapping(
-      "username" -> email,
+      "email" -> email,
       "password" -> nonEmptyText(minLength = 8)
-    )(AuthForm.apply)(AuthForm.unapply)
+    )(AuthLoginForm.apply)(AuthLoginForm.unapply)
+  )
+
+}
+
+
+case class CreateUserForm(
+  email: String,
+  rawPassword: String,
+  name: String
+)
+
+object CreateUserForm {
+
+  val form: Form[CreateUserForm] = Form(
+    mapping(
+      "email" -> email,
+      "password" -> nonEmptyText(minLength = 8),
+      "name" -> nonEmptyText(minLength = 1, maxLength = 20)
+    )(CreateUserForm.apply)(CreateUserForm.unapply)
   )
 
 }
