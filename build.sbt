@@ -18,6 +18,9 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3"
 )
 
+// https://mvnrepository.com/artifact/de.huxhorn.sulky/de.huxhorn.sulky.ulid
+libraryDependencies += "de.huxhorn.sulky" % "de.huxhorn.sulky.ulid" % "8.2.0"
+
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.example.controllers._"
 

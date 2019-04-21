@@ -6,3 +6,4 @@ POST    /auths/login              v0.controllers.AuthsController.login
 POST    /auths/logout             v0.controllers.AuthsController.logout
 
 GET     /users                    v0.controllers.UsersController.get
+GET     /users/getMyDetails       v0.controllers.UsersController.getMyDetails
