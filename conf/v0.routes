@@ -7,3 +7,6 @@ POST    /auths/logout             v0.controllers.AuthsController.logout
 
 GET     /users                    v0.controllers.UsersController.get
 GET     /users/getMyDetails       v0.controllers.UsersController.getMyDetails
+
+GET     /comments                 v0.controllers.CommentsController.get
+POST    /comments                 v0.controllers.CommentsController.comment

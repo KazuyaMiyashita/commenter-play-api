@@ -24,10 +24,10 @@ class AuthsTable(private val config: Configuration) {
   import AuthsTable._
 
   def save(form: CreateUserForm): Try[Unit] = Try {
-    val auth_id: String = createULID
+    val auth_id: String = createULID()
     val email = form.email
     val hashedPassword = createHash(form.rawPassword)
-    val user_id: String = createULID
+    val user_id: String = createULID()
     val name = form.name
     sql"insert into auths (id, email, password) values (${auth_id}, ${email}, ${hashedPassword})"
       .update.apply()
@@ -86,7 +86,7 @@ object AuthsTable {
   def authenticate(rawPassword: String, hashedPassword: String): Boolean =
     bcrypt.matches(rawPassword, hashedPassword)
 
-  def createULID: String = (new ULID).nextULID
+  def createULID(): String = (new ULID).nextULID
 
   def createToken(currentTimeMills: Long, anotherSeed: Any): String = {
     import util.Random
