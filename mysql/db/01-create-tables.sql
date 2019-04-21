@@ -40,7 +40,7 @@ create table if not exists `comments`
 (
   `id`              char(64) unique not null,
   `user_id`         char(64) not null,
-  `comment`         char(64) not null,
+  `comment`         char(255) not null,
   `created_at`      timestamp not null,
   primary key (`id`),
   foreign key (`user_id`) references `users`(`id`)
