@@ -5,6 +5,7 @@ use `commenter`;
 drop table if exists `auths`;
 drop table if exists `tokens`;
 drop table if exists `users`;
+drop table if exists `comments`;
 
 # create
 create table if not exists `auths`
@@ -33,4 +34,14 @@ create table if not exists `users`
   `name`             VARCHAR(32) NOT NULL,
   primary key (`id`),
   foreign key (`auth_id`) references `auths`(`id`)
+);
+
+create table if not exists `comments`
+(
+  `id`              char(64) unique not null,
+  `user_id`         char(64) not null,
+  `comment`         char(64) not null,
+  `created_at`      timestamp not null,
+  primary key (`id`),
+  foreign key (`user_id`) references `users`(`id`)
 );
