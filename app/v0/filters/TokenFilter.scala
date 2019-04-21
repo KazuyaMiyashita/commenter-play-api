@@ -7,6 +7,8 @@ import scalikejdbc._
 
 import util.{Try, Success, Failure}
 
+import scala.concurrent._
+import java.util.concurrent.Executors
 import scala.concurrent.duration._
 
 import v0._
@@ -50,13 +52,25 @@ class TokenFilter(private val config: Configuration) {
           .single.apply()
       }
     } flatMap {
-      case Some(user) => Success(user)
+      case Some(user) => {
+        deleteExpiredTokens()
+        Success(user)
+      }
       case None => Failure(new InvalidTokenException)
     }
   }
+
+  def deleteExpiredTokens(): Future[Unit] = Future {
+    Thread.sleep(5000)
+    println("hoge")
+  }(TokenFilter.ec)
 
 }
 
 class TokenFilterException extends Exception
 class NonExistTokenInHeaderException extends TokenFilterException
 class InvalidTokenException extends TokenFilterException
+
+object TokenFilter {
+  val ec = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+}
