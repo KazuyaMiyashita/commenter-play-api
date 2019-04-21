@@ -30,7 +30,7 @@ class TokenFilter(private val config: Configuration) {
     )
   
     (request.headers.get("Authorization") match {
-      case None => Failure(new NonExistTokenException)
+      case None => Failure(new NonExistTokenInHeaderException)
       case Some(token) => Success(token)
     }) flatMap {
       case token => Try {
@@ -51,12 +51,12 @@ class TokenFilter(private val config: Configuration) {
       }
     } flatMap {
       case Some(user) => Success(user)
-      case None => Failure(new TokenFilterException)
+      case None => Failure(new InvalidTokenException)
     }
   }
 
 }
 
 class TokenFilterException extends Exception
-class NonExistTokenException extends TokenFilterException
+class NonExistTokenInHeaderException extends TokenFilterException
 class InvalidTokenException extends TokenFilterException

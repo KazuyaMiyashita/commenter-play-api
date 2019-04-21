@@ -28,7 +28,7 @@ class UsersController @Inject()(config: Configuration, cc: ControllerComponents)
     val userView = new UserView
     (tokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized)
+      case Failure(e: TokenFilterException) => Left(Unauthorized(userView.onError(e)))
       case Failure(e) => Left(InternalServerError(userView.onError(e)))
     }) flatMap {
       user => Right(Ok(userView.showDetails(user)))
