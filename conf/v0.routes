@@ -10,3 +10,6 @@ GET     /users/getMyDetails       v0.controllers.UsersController.getMyDetails
 
 GET     /comments                 v0.controllers.CommentsController.get
 POST    /comments                 v0.controllers.CommentsController.comment
+
+GET     /follow                   v0.controllers.FollowsController.follow
+POST    /follow                   v0.controllers.FollowsController.follow
