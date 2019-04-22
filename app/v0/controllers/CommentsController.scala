@@ -24,8 +24,23 @@ class CommentsController @Inject()(config: Configuration, cc: ControllerComponen
 
   val tokenFilter = new TokenFilter(config)
   val commentsTable = new CommentsTable(config)
-  
+
   def get() = Action { implicit request: Request[AnyContent] =>
+    val view = new CommentView
+    (tokenFilter.checkUserToken() match {
+      case Success(user) => Right(user)
+      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
+      case Failure(e) => Left(InternalServerError(view.onError(e)))
+    }) flatMap { user: User =>
+      commentsTable.get(user) match {
+        case Success(comments) => Right(Ok(view.showComments(comments)))
+        case Failure(f) => Left(InternalServerError(view.onError(f)))
+      }
+    } merge
+
+  }
+  
+  def getAll() = Action { implicit request: Request[AnyContent] =>
     val view = new CommentView
     (tokenFilter.checkUserToken() match {
       case Success(user) => Right(user)

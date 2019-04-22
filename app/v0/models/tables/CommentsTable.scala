@@ -23,13 +23,21 @@ class CommentsTable(private val config: Configuration) {
 
   import CommentsTable._
 
-  def getAll(): Try[List[Comment]] = Try {
-    def toCommentEntity(rs: WrappedResultSet): Comment = Comment(
-      id = rs.get("id"),
-      userId = rs.get("user_id"),
-      comment = rs.get("comment")
-    )
+  def get(user: User): Try[List[Comment]] = Try {
+    val comments: List[Comment] =
+      // sql"""
+      //   select id, user_id, comment from comments
 
+      //     where user_id in 
+      //     order by created_at desc
+      // """
+      //   .map(rs => toCommentEntity(rs)).list.apply()
+    comments
+
+    ???
+  }
+
+  def getAll(): Try[List[Comment]] = Try {
     val comments: List[Comment] =
       sql"select id, user_id, comment from comments order by created_at desc"
         .map(rs => toCommentEntity(rs)).list.apply()
@@ -52,5 +60,10 @@ object CommentsTable {
 
   def createULID(): String = (new ULID).nextULID
 
+  private def toCommentEntity(rs: WrappedResultSet): Comment = Comment(
+    id = rs.get("id"),
+    userId = rs.get("user_id"),
+    comment = rs.get("comment")
+  )
 
 }
