@@ -6,6 +6,8 @@ drop table if exists `auths`;
 drop table if exists `tokens`;
 drop table if exists `users`;
 drop table if exists `comments`;
+drop table if exists `follows`;
+
 
 # create
 create table if not exists `auths`
@@ -44,4 +46,13 @@ create table if not exists `comments`
   `created_at`      timestamp not null,
   primary key (`id`),
   foreign key (`user_id`) references `users`(`id`)
+);
+
+create table if not exists `follows`
+(
+  `follow_user_id`    char(64) not null,
+  `followed_user_id`  char(64) not null,
+  index (`follow_user_id`, `followed_user_id`),
+  foreign key (`follow_user_id`) references `users`(`id`),
+  foreign key (`followed_user_id`) references `users`(`id`)
 );
