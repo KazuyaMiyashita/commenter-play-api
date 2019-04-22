@@ -16,6 +16,7 @@ class CommentView(implicit messageProvider: MessagesProvider) {
         Json.obj(
           "id" -> comment.id,
           "userId" -> comment.userId,
+          "userName" -> comment.userName,
           "comment" -> comment.comment
         )
       }

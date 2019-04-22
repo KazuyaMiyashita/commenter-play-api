@@ -27,12 +27,15 @@ class CommentsTable(private val config: Configuration) {
     val follow_user_id = user.id
     val comments: List[Comment] =
       sql"""
-        select id, user_id, comment from comments
-          where exists (
-            select * from follows
-              where follow_user_id = ${follow_user_id}
-              and comments.user_id = follows.followed_user_id
-          )
+        select c.id as id, c.user_id as user_id, c.comment as comment, u.name as user_name
+          from comments as c
+            inner join users as u
+              on c.user_id = u.id
+            where exists (
+              select * from follows
+                where follow_user_id = ${follow_user_id}
+                and c.user_id = follows.followed_user_id
+            )
           order by created_at desc;
       """
         .map(rs => toCommentEntity(rs)).list.apply()
@@ -41,7 +44,13 @@ class CommentsTable(private val config: Configuration) {
 
   def getAll(): Try[List[Comment]] = Try {
     val comments: List[Comment] =
-      sql"select id, user_id, comment from comments order by created_at desc"
+      sql"""
+      select c.id as id, c.user_id as user_id, c.comment as comment, u.name as user_name
+        from comments as c
+          inner join users as u
+            on c.user_id = u.id
+        order by created_at desc;
+    """
         .map(rs => toCommentEntity(rs)).list.apply()
     comments
   }
@@ -65,6 +74,7 @@ object CommentsTable {
   private def toCommentEntity(rs: WrappedResultSet): Comment = Comment(
     id = rs.get("id"),
     userId = rs.get("user_id"),
+    userName = rs.get("user_name"),
     comment = rs.get("comment")
   )
 
