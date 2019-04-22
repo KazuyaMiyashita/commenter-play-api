@@ -40,4 +40,28 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
     } merge
   }
 
+  def follower() = Action { implicit request: Request[AnyContent] =>
+    val view = new FollowView
+    (tokenFilter.checkUserToken() match {
+      case Success(user) => Right(followTable.follower(user))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
+      case Failure(e) => Left(InternalServerError(view.onError(e)))
+    }) flatMap {
+      case Success(users) => Right(Ok(view.showUsers(users)))
+      case Failure(f) => Left(InternalServerError(view.onError(f)))
+    } merge
+  }
+
+  def followee() = Action { implicit request: Request[AnyContent] =>
+    val view = new FollowView
+    (tokenFilter.checkUserToken() match {
+      case Success(user) => Right(followTable.followee(user))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
+      case Failure(e) => Left(InternalServerError(view.onError(e)))
+    }) flatMap {
+      case Success(users) => Right(Ok(view.showUsers(users)))
+      case Failure(f) => Left(InternalServerError(view.onError(f)))
+    } merge
+  }
+
 }
