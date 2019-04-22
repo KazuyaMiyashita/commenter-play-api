@@ -24,17 +24,19 @@ class CommentsTable(private val config: Configuration) {
   import CommentsTable._
 
   def get(user: User): Try[List[Comment]] = Try {
+    val follow_user_id = user.id
     val comments: List[Comment] =
-      // sql"""
-      //   select id, user_id, comment from comments
-
-      //     where user_id in 
-      //     order by created_at desc
-      // """
-      //   .map(rs => toCommentEntity(rs)).list.apply()
+      sql"""
+        select id, user_id, comment from comments
+          where exists (
+            select * from follows
+              where follow_user_id = ${follow_user_id}
+              and comments.user_id = follows.followed_user_id
+          )
+          order by created_at desc;
+      """
+        .map(rs => toCommentEntity(rs)).list.apply()
     comments
-
-    ???
   }
 
   def getAll(): Try[List[Comment]] = Try {
