@@ -12,7 +12,6 @@ GET     /comments                 v0.controllers.CommentsController.get
 POST    /comments                 v0.controllers.CommentsController.comment
 GET     /comments/getAll          v0.controllers.CommentsController.getAll
 
-GET     /follows                   v0.controllers.FollowsController.follow
 POST    /follows                   v0.controllers.FollowsController.follow
-GET     /follows/follower          v0.controllers.FollowsController.follower
-GET     /follows/followee          v0.controllers.FollowsController.followee
+GET     /follows/follower          v0.controllers.FollowsController.getFollowers
+GET     /follows/followee          v0.controllers.FollowsController.getFollowees

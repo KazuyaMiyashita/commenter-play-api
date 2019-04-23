@@ -40,7 +40,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
     } merge
   }
 
-  def follower() = Action { implicit request: Request[AnyContent] =>
+  def getFollowers() = Action { implicit request: Request[AnyContent] =>
     val view = new FollowView
     (tokenFilter.checkUserToken() match {
       case Success(user) => Right(followTable.follower(user))
@@ -52,7 +52,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
     } merge
   }
 
-  def followee() = Action { implicit request: Request[AnyContent] =>
+  def getFollowees() = Action { implicit request: Request[AnyContent] =>
     val view = new FollowView
     (tokenFilter.checkUserToken() match {
       case Success(user) => Right(followTable.followee(user))

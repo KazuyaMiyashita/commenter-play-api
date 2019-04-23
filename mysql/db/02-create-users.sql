@@ -16,7 +16,7 @@ insert into tokens (token, auth_id, created_at) values ("Bearer DcCxQARz1Gszsy.O
 insert into tokens (token, auth_id, created_at) values ("Bearer R2hlzuy.IEvUve9Yk~0tj/-SLc8w/JX-w9KwYbPkXqJUFYS4wWP5YQdpcFdtn/ZE", "01D92B4Y5F89PJPPV8Y8BDYY3Y", current_timestamp); # ひよこ
 
 # follows
-insert into follows (follow_user_id, followed_user_id) values ("01D90WXJXCCB10KM24TAPNKHEQ", "01D92B2WZT4C2PKV70V65W9GJ0"); # みやしー -> ふにゃ
-insert into follows (follow_user_id, followed_user_id) values ("01D90WXJXCCB10KM24TAPNKHEQ", "01D92B4Y7QHGQCK5N7849P6QC4"); # みやしー -> ひよこ
-insert into follows (follow_user_id, followed_user_id) values ("01D92B2WZT4C2PKV70V65W9GJ0", "01D92B4Y7QHGQCK5N7849P6QC4"); # ふにゃ -> ひよこ
-insert into follows (follow_user_id, followed_user_id) values ("01D92B4Y7QHGQCK5N7849P6QC4", "01D90WXJXCCB10KM24TAPNKHEQ"); # ひよこ -> みやしー
+insert into follows (follower, followee) values ("01D90WXJXCCB10KM24TAPNKHEQ", "01D92B2WZT4C2PKV70V65W9GJ0"); # みやしー -> ふにゃ
+insert into follows (follower, followee) values ("01D90WXJXCCB10KM24TAPNKHEQ", "01D92B4Y7QHGQCK5N7849P6QC4"); # みやしー -> ひよこ
+insert into follows (follower, followee) values ("01D92B2WZT4C2PKV70V65W9GJ0", "01D92B4Y7QHGQCK5N7849P6QC4"); # ふにゃ -> ひよこ
+insert into follows (follower, followee) values ("01D92B4Y7QHGQCK5N7849P6QC4", "01D90WXJXCCB10KM24TAPNKHEQ"); # ひよこ -> みやしー

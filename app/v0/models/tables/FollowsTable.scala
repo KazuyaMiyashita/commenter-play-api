@@ -21,9 +21,9 @@ class FollowsTable(private val config: Configuration) {
   import FollowsTable._
 
   def follow(mine: User, followForm: FollowForm): Try[Unit] = Try {
-    val follow_user_id: String = mine.id
-    val followed_user_id: String = followForm.followedUserId
-    sql"insert into follows (follow_user_id, followed_user_id) values (${follow_user_id}, ${followed_user_id})"
+    val follower: String = mine.id
+    val followee: String = followForm.followedUserId
+    sql"insert into follows (follower, followee) values (${follower}, ${followee})"
       .update.apply()
   }
 
@@ -31,8 +31,8 @@ class FollowsTable(private val config: Configuration) {
     sql"""
       select id, name from users as u
         inner join follows as f
-          on f.follow_user_id = ${user.id}
-          and f.followed_user_id = u.id;
+          on f.follower = ${user.id}
+          and f.followee = u.id;
     """
       .map(rs => toUserEntity(rs)).list.apply()
   }
@@ -41,8 +41,8 @@ class FollowsTable(private val config: Configuration) {
     sql"""
       select id, name from users as u
         inner join follows as f
-          on f.followed_user_id = ${user.id}
-          and f.follow_user_id = u.id;
+          on f.followee = ${user.id}
+          and f.follower = u.id;
     """
       .map(rs => toUserEntity(rs)).list.apply()
   }
