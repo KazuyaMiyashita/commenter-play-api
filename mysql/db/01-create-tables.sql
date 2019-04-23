@@ -51,8 +51,11 @@ create table if not exists `comments`
 create table if not exists `follows`
 (
   `follower`    char(64) not null,
-  `followee`  char(64) not null,
-  index (`follower`, `followee`),
+  `followee`    char(64) not null,
+  # check (`follower` <> `followee`), # mysql8.0.16から利用できる(現在8.0.15)
+  index (`follower`),
+  index (`followee`),
+  primary key (`follower`, `followee`),
   foreign key (`follower`) references `users`(`id`),
   foreign key (`followee`) references `users`(`id`)
 );
