@@ -20,11 +20,15 @@ class FollowsTable(private val config: Configuration) {
 
   import FollowsTable._
 
-  def follow(mine: User, followForm: FollowForm): Try[Unit] = Try {
+  def follow(mine: User, followForm: FollowForm): Try[Unit] = {
     val follower: String = mine.id
-    val followee: String = followForm.followedUserId
-    sql"insert into follows (follower, followee) values (${follower}, ${followee})"
-      .update.apply()
+    val followee: String = followForm.followee
+    
+    if (follower == followee) Failure(new FollowMyselfException)
+    else Try {
+      sql"insert into follows (follower, followee) values (${follower}, ${followee})"
+        .update.apply()
+    }
   }
 
   def follower(user: User): Try[List[User]] = Try {
@@ -48,6 +52,9 @@ class FollowsTable(private val config: Configuration) {
   }
 
 }
+
+class FollowsTableException extends Exception
+class FollowMyselfException extends FollowsTableException
 
 object FollowsTable {
   

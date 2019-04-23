@@ -12,7 +12,7 @@ import v0._
 import filters._
 import models.entities.User
 import models.forms.FollowForm
-import models.tables.FollowsTable
+import models.tables._
 import views.follows.FollowView
 import utils.ControllerUtils._
 
@@ -35,6 +35,8 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
         case Left(badForm) => Left(BadRequest(view.onFormError(badForm)))
       }) flatMap {
         case Success(_) => Right(Ok)
+        case Failure(f: FollowMyselfException) => Left(BadRequest(view.onError(f)))
+        case Failure(f: java.sql.SQLIntegrityConstraintViolationException) => Left(Conflict(view.onError(f)))
         case Failure(f) => Left(InternalServerError(view.onError(f)))
       }
     } merge

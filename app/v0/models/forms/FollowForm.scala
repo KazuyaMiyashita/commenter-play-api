@@ -4,14 +4,14 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 case class FollowForm(
-  followedUserId: String,
+  followee: String,
 )
 
 object FollowForm {
 
   val form: Form[FollowForm] = Form(
     mapping(
-      "followedUserId" -> nonEmptyText
+      "followee" -> nonEmptyText
     )(FollowForm.apply)(FollowForm.unapply)
   )
 
