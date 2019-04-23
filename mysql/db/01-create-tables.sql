@@ -50,9 +50,9 @@ create table if not exists `comments`
 
 create table if not exists `follows`
 (
-  `follow_user_id`    char(64) not null,
-  `followed_user_id`  char(64) not null,
-  index (`follow_user_id`, `followed_user_id`),
-  foreign key (`follow_user_id`) references `users`(`id`),
-  foreign key (`followed_user_id`) references `users`(`id`)
+  `follower`    char(64) not null,
+  `followee`  char(64) not null,
+  index (`follower`, `followee`),
+  foreign key (`follower`) references `users`(`id`),
+  foreign key (`followee`) references `users`(`id`)
 );

@@ -24,7 +24,7 @@ class CommentsTable(private val config: Configuration) {
   import CommentsTable._
 
   def get(user: User): Try[List[Comment]] = Try {
-    val follow_user_id = user.id
+    val follower = user.id
     val comments: List[Comment] =
       sql"""
         select c.id as id, c.user_id as user_id, c.comment as comment, u.name as user_name
@@ -33,8 +33,8 @@ class CommentsTable(private val config: Configuration) {
               on c.user_id = u.id
             where exists (
               select * from follows
-                where follow_user_id = ${follow_user_id}
-                and c.user_id = follows.followed_user_id
+                where follower = ${follower}
+                and c.user_id = follows.followee
             )
           order by created_at desc;
       """
