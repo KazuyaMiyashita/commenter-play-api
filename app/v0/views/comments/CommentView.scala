@@ -12,7 +12,7 @@ import models.forms.CommentForm
 object CommentView extends View {
 
   def showComments(comments: Seq[Comment]): JsValue = {
-    Json.arr(
+    Json.toJson(
       comments map { comment =>
         Json.obj(
           "id" -> comment.id,

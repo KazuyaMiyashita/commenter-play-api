@@ -12,7 +12,7 @@ import models.forms.FollowForm
 object FollowView extends View {
 
   def showUsers(users: Seq[User]): JsValue = {
-    Json.arr(
+    Json.toJson(
       users map { user =>
         Json.obj(
           "id" -> user.id,
