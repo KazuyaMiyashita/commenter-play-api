@@ -7,7 +7,7 @@ import play.api.i18n.MessagesProvider
 import v0._
 import models.forms.AuthLoginForm
 
-class LoginView(implicit messageProvider: MessagesProvider) {
+object LoginView {
 
   def onOK(token: String): JsValue = Json.obj(
     "token" -> token
@@ -17,7 +17,7 @@ class LoginView(implicit messageProvider: MessagesProvider) {
     "error" -> error.toString
   )
 
-  def onFormError(badForm: Form[AuthLoginForm]): JsValue = {
+  def onFormError(badForm: Form[AuthLoginForm])(implicit messageProvider: MessagesProvider): JsValue = {
     Json.obj(
       "error" -> badForm.errorsAsJson
     )

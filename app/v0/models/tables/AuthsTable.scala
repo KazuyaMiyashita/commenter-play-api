@@ -12,18 +12,18 @@ import util.{Try, Success, Failure}
 import v0.models.entities.Auth
 import v0.models.forms.{CreateUserForm, AuthLoginForm}
 
-class AuthsTable(private val config: Configuration) {
 
-  ConnectionPool.singleton(
-    config.get[String]("db.url"),
-    config.get[String]("db.username"),
-    config.get[String]("db.password")
-  )
+class AuthsTableException extends Exception
+class NonExistUserException(username: String) extends AuthsTableException
+class InvalidPasswordException extends AuthsTableException
+
+object AuthsTable {
+
   implicit val session = AutoSession
 
-  import AuthsTable._
+  def save(form: CreateUserForm)(implicit config: Configuration): Try[Unit] = Try {
+    Table.getConnectionPool(config)
 
-  def save(form: CreateUserForm): Try[Unit] = Try {
     val auth_id: String = createULID()
     val email = form.email
     val hashedPassword = createHash(form.rawPassword)
@@ -35,7 +35,9 @@ class AuthsTable(private val config: Configuration) {
       .update.apply()
   }
 
-  def login(form: AuthLoginForm): Try[String] = {
+  def login(form: AuthLoginForm)(implicit config: Configuration): Try[String] = {
+    Table.getConnectionPool(config)
+
     def mkAuthEntity(rs: WrappedResultSet) = Auth(
       id = rs.get("id"),
       email = rs.get("email"),
@@ -73,22 +75,15 @@ class AuthsTable(private val config: Configuration) {
 
   }
 
-}
 
-class AuthsTableException extends Exception
-class NonExistUserException(username: String) extends AuthsTableException
-class InvalidPasswordException extends AuthsTableException
-
-object AuthsTable {
-
-  val bcrypt = new BCryptPasswordEncoder()
-  def createHash(password: String): String = bcrypt.encode(password)
-  def authenticate(rawPassword: String, hashedPassword: String): Boolean =
+  private val bcrypt = new BCryptPasswordEncoder()
+  private def createHash(password: String): String = bcrypt.encode(password)
+  private def authenticate(rawPassword: String, hashedPassword: String): Boolean =
     bcrypt.matches(rawPassword, hashedPassword)
 
-  def createULID(): String = (new ULID).nextULID
+  private def createULID(): String = (new ULID).nextULID
 
-  def createToken(currentTimeMills: Long, anotherSeed: Any): String = {
+  private def createToken(currentTimeMills: Long, anotherSeed: Any): String = {
     import util.Random
     val rnd = new Random
     rnd.setSeed(currentTimeMills + anotherSeed.##)

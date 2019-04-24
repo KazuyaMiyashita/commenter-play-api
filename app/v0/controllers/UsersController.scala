@@ -15,23 +15,20 @@ import filters._
 
 
 @Singleton
-class UsersController @Inject()(config: Configuration, cc: ControllerComponents)
+class UsersController @Inject()(implicit config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
-
-  val tokenFilter = new TokenFilter(config)
 
   def get() = Action { implicit request: Request[AnyContent] =>
     Ok("v0.UsersController.get")
   }
 
   def getMe() = Action { implicit request: Request[AnyContent] =>
-    val userView = new UserView
-    (tokenFilter.checkUserToken() match {
+    (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized(userView.onError(e)))
-      case Failure(e) => Left(InternalServerError(userView.onError(e)))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(UserView.onError(e)))
+      case Failure(e) => Left(InternalServerError(UserView.onError(e)))
     }) flatMap {
-      user => Right(Ok(userView.showDetails(user)))
+      user => Right(Ok(UserView.showDetails(user)))
     } merge
   }
 

@@ -8,7 +8,7 @@ import v0._
 import models.entities.User
 import models.forms.FollowForm
 
-class FollowView(implicit messageProvider: MessagesProvider) {
+object FollowView {
 
   def showUsers(users: Seq[User]): JsValue = {
     Json.arr(
@@ -21,7 +21,7 @@ class FollowView(implicit messageProvider: MessagesProvider) {
     )
   }
 
-  def onFormError(badForm: Form[FollowForm]): JsValue = {
+  def onFormError(badForm: Form[FollowForm])(implicit messageProvider: MessagesProvider): JsValue = {
     Json.obj(
       "error" -> badForm.errorsAsJson
     )

@@ -15,12 +15,12 @@ class FollowMyselfException extends FollowsTableException
 class FollowDuplicateException extends FollowsTableException
 class FollowNonExistUserException extends FollowsTableException
 
-object FollowsTable extends Table {
+object FollowsTable {
 
   implicit val session = AutoSession
 
-  def follow(mine: User, followForm: FollowForm)(config: Configuration): Try[Unit] = {
-    getConnectionPool(config)
+  def follow(mine: User, followForm: FollowForm)(implicit config: Configuration): Try[Unit] = {
+    Table.getConnectionPool(config)
     val follower: String = mine.id
     val followee: String = followForm.followee
     
@@ -34,8 +34,8 @@ object FollowsTable extends Table {
     }
   }
 
-  def follower(user: User)(config: Configuration): Try[List[User]] = Try {
-    getConnectionPool(config)
+  def follower(user: User)(implicit config: Configuration): Try[List[User]] = Try {
+    Table.getConnectionPool(config)
     sql"""
       select id, name from users as u
         inner join follows as f
@@ -45,8 +45,8 @@ object FollowsTable extends Table {
       .map(rs => toUserEntity(rs)).list.apply()
   }
 
-  def followee(user: User)(config: Configuration): Try[List[User]] = Try {
-    getConnectionPool(config)
+  def followee(user: User)(implicit config: Configuration): Try[List[User]] = Try {
+    Table.getConnectionPool(config)
     sql"""
       select id, name from users as u
         inner join follows as f
@@ -55,17 +55,8 @@ object FollowsTable extends Table {
     """
       .map(rs => toUserEntity(rs)).list.apply()
   }
-
-
-  def getConnectionPool(config: Configuration) {
-    ConnectionPool.singleton(
-      config.get[String]("db.url"),
-      config.get[String]("db.username"),
-      config.get[String]("db.password")
-    )
-  }
   
-  def toUserEntity(rs: WrappedResultSet): User = User (
+  private def toUserEntity(rs: WrappedResultSet): User = User (
     id = rs.get("id"),
     name = rs.get("name")
   )

@@ -11,19 +11,21 @@ import scala.concurrent.duration._
 
 import v0._
 import models.entities.User
+import models.tables.Table
 
-class TokenFilter(private val config: Configuration) {
+class TokenFilterException extends Exception
+class NonExistTokenInHeaderException extends TokenFilterException
+class InvalidTokenException extends TokenFilterException
 
-  ConnectionPool.singleton(
-    config.get[String]("db.url"),
-    config.get[String]("db.username"),
-    config.get[String]("db.password")
-  )
+object TokenFilter {
+
   implicit val session = AutoSession
 
   val tokenExpirationDuration = 1.day
 
-  def checkUserToken()(implicit request: Request[AnyContent]): Try[User] = {
+  def checkUserToken()(implicit config: Configuration, request: Request[AnyContent]): Try[User] = {
+    Table.getConnectionPool(config)
+
     def mkUserEntity(rs: WrappedResultSet) = User(
       id = rs.get("id"),
       name = rs.get("name")
@@ -56,7 +58,3 @@ class TokenFilter(private val config: Configuration) {
   }
 
 }
-
-class TokenFilterException extends Exception
-class NonExistTokenInHeaderException extends TokenFilterException
-class InvalidTokenException extends TokenFilterException

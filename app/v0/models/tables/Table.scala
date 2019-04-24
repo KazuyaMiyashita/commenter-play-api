@@ -1,5 +1,7 @@
 package v0.models.tables
 
+import play.api.Configuration
+import scalikejdbc._
 import com.mysql.cj.exceptions.MysqlErrorNumbers
 import util.{Try, Success, Failure}
 
@@ -9,8 +11,6 @@ trait MySQLException extends Exception {
 
 class ER_DUP_ENTRY(val e: java.sql.SQLException) extends MySQLException
 class ER_NO_REFERENCED_ROW_2(val e: java.sql.SQLException) extends MySQLException
-
-class Table 
 
 object Table {
 
@@ -22,6 +22,14 @@ object Table {
         case _ => Failure(e)
       }
     } recoverWith(pf)
+  }
+
+  def getConnectionPool(config: Configuration) {
+    ConnectionPool.singleton(
+      config.get[String]("db.url"),
+      config.get[String]("db.username"),
+      config.get[String]("db.password")
+    )
   }
 
 }
