@@ -1,13 +1,15 @@
 package v0.utils
 
+import com.mysql.cj.exceptions.MysqlErrorNumbers._
+
 object TableUtils {
 
   def handleMySQLError(error: Throwable): Throwable = {
     error match {
       case sqlError: java.sql.SQLException => {
         sqlError.getErrorCode match {
-          case 1062 => new Throwable // Duplicate entry
-          case 1452 => new Throwable // Cannot add or update a child row: a foreign key constraint fails
+          case ER_DUP_ENTRY => new Throwable
+          case ER_NO_REFERENCED_ROW_2 => new Throwable
         }
       }
       case _ => error
