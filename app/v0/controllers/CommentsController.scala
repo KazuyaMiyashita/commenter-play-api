@@ -19,55 +19,49 @@ import filters._
 
 
 @Singleton
-class CommentsController @Inject()(config: Configuration, cc: ControllerComponents)
+class CommentsController @Inject()(implicit config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
 
-  val tokenFilter = new TokenFilter(config)
-  val commentsTable = new CommentsTable(config)
-
   def get() = Action { implicit request: Request[AnyContent] =>
-    val view = new CommentView
-    (tokenFilter.checkUserToken() match {
+    (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(CommentView.onError(e)))
+      case Failure(e) => Left(InternalServerError(CommentView.onError(e)))
     }) flatMap { user: User =>
-      commentsTable.get(user) match {
-        case Success(comments) => Right(Ok(view.showComments(comments)))
-        case Failure(f) => Left(InternalServerError(view.onError(f)))
+      CommentsTable.get(user) match {
+        case Success(comments) => Right(Ok(CommentView.showComments(comments)))
+        case Failure(f) => Left(InternalServerError(CommentView.onError(f)))
       }
     } merge
 
   }
   
   def getAll() = Action { implicit request: Request[AnyContent] =>
-    val view = new CommentView
-    (tokenFilter.checkUserToken() match {
+    (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(CommentView.onError(e)))
+      case Failure(e) => Left(InternalServerError(CommentView.onError(e)))
     }) flatMap {
-      _ => Right(commentsTable.getAll())
+      _ => Right(CommentsTable.getAll())
     } flatMap {
-      case Success(comments) => Right(Ok(view.showComments(comments)))
-      case Failure(f) => Left(InternalServerError(view.onError(f)))
+      case Success(comments) => Right(Ok(CommentView.showComments(comments)))
+      case Failure(f) => Left(InternalServerError(CommentView.onError(f)))
     } merge
   }
 
   def comment() = Action { implicit request: Request[AnyContent] =>
-    val view = new CommentView
-    (tokenFilter.checkUserToken() match {
+    (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(CommentView.onError(e)))
+      case Failure(e) => Left(InternalServerError(CommentView.onError(e)))
     }) flatMap {
       user: User => {
         (bindFromRequest(CommentForm.form) match {
-          case Right(form) => Right(commentsTable.comment(form, user))
-          case Left(badForm) => Left(BadRequest(view.onFormError(badForm)))
+          case Right(form) => Right(CommentsTable.comment(form, user))
+          case Left(badForm) => Left(BadRequest(CommentView.onFormError(badForm)))
         }) flatMap {
           case Success(_) => Right(Ok)
-          case Failure(f) => Left(InternalServerError(view.onError(f)))
+          case Failure(f) => Left(InternalServerError(CommentView.onError(f)))
         }
       }
     } merge

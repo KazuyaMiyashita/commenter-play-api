@@ -12,18 +12,14 @@ import util.{Try, Success, Failure}
 import v0.models.entities.{User, Comment}
 import v0.models.forms.CommentForm
 
-class CommentsTable(private val config: Configuration) {
 
-  ConnectionPool.singleton(
-    config.get[String]("db.url"),
-    config.get[String]("db.username"),
-    config.get[String]("db.password")
-  )
+class CommentsTableException extends Exception
+
+object CommentsTable {
+
   implicit val session = AutoSession
 
-  import CommentsTable._
-
-  def get(user: User): Try[List[Comment]] = Try {
+  def get(user: User)(implicit config: Configuration): Try[List[Comment]] = Try {
     val follower = user.id
     val comments: List[Comment] =
       sql"""
@@ -42,7 +38,7 @@ class CommentsTable(private val config: Configuration) {
     comments
   }
 
-  def getAll(): Try[List[Comment]] = Try {
+  def getAll()(implicit config: Configuration): Try[List[Comment]] = Try {
     val comments: List[Comment] =
       sql"""
       select c.id as id, c.user_id as user_id, c.comment as comment, u.name as user_name
@@ -55,7 +51,7 @@ class CommentsTable(private val config: Configuration) {
     comments
   }
 
-  def comment(form: CommentForm, user: User): Try[Unit] = Try {
+  def comment(form: CommentForm, user: User)(implicit config: Configuration): Try[Unit] = Try {
     val id: String = createULID()
     val user_id: String = user.id
     val comment: String = form.comment
@@ -63,13 +59,8 @@ class CommentsTable(private val config: Configuration) {
       .update.apply()
   }
 
-}
 
-class CommentsTableException extends Exception
-
-object CommentsTable {
-
-  def createULID(): String = (new ULID).nextULID
+  private def createULID(): String = (new ULID).nextULID
 
   private def toCommentEntity(rs: WrappedResultSet): Comment = Comment(
     id = rs.get("id"),

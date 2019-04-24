@@ -6,9 +6,9 @@ import play.api.i18n.MessagesProvider
 
 import v0._
 
-class LogoutView(implicit messageProvider: MessagesProvider) {
+object LogoutView {
 
-  def onError(error: Throwable): JsValue = Json.obj(
+  def onError(error: Throwable)(implicit messageProvider: MessagesProvider): JsValue = Json.obj(
     "error" -> error.toString
   )
 

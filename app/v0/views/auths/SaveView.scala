@@ -7,7 +7,7 @@ import play.api.i18n.MessagesProvider
 import v0._
 import models.forms.CreateUserForm
 
-class SaveView(implicit messageProvider: MessagesProvider) {
+object SaveView {
 
   def onOK(token: String): JsValue = Json.obj(
     "token" -> token
@@ -17,7 +17,7 @@ class SaveView(implicit messageProvider: MessagesProvider) {
     "error" -> error.toString
   )
 
-  def onFormError(badForm: Form[CreateUserForm]): JsValue = {
+  def onFormError(badForm: Form[CreateUserForm])(implicit messageProvider: MessagesProvider): JsValue = {
     Json.obj(
       "error" -> badForm.errorsAsJson
     )

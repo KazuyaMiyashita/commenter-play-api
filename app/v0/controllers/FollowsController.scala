@@ -17,53 +17,50 @@ import views.follows.FollowView
 import utils.ControllerUtils._
 
 @Singleton
-class FollowsController @Inject()(config: Configuration, cc: ControllerComponents)
+class FollowsController @Inject()(implicit config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
 
-  val tokenFilter = new TokenFilter(config)
-  val followTable = new FollowsTable(config)
-
   def follow() = Action { implicit request: Request[AnyContent] => 
-    val view = new FollowView
-    (tokenFilter.checkUserToken() match {
+    // val view = new FollowView
+    (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
+      case Failure(e) => Left(InternalServerError(FollowView.onError(e)))
     }) flatMap {
       user => (bindFromRequest(FollowForm.form) match {
-        case Right(form) => Right(followTable.follow(user, form))
-        case Left(badForm) => Left(BadRequest(view.onFormError(badForm)))
+        case Right(form) => Right(FollowsTable.follow(user, form))
+        case Left(badForm) => Left(BadRequest(FollowView.onFormError(badForm)))
       }) flatMap {
         case Success(_) => Right(Ok)
-        case Failure(f: FollowMyselfException) => Left(BadRequest(view.onError(f)))
-        case Failure(f: FollowNonExistUserException) => Left(NotFound(view.onError(f)))
-        case Failure(f: FollowDuplicateException) => Left(Conflict(view.onError(f)))
-        case Failure(f) => Left(InternalServerError(view.onError(f)))
+        case Failure(f: FollowMyselfException) => Left(BadRequest(FollowView.onError(f)))
+        case Failure(f: FollowNonExistUserException) => Left(NotFound(FollowView.onError(f)))
+        case Failure(f: FollowDuplicateException) => Left(Conflict(FollowView.onError(f)))
+        case Failure(f) => Left(InternalServerError(FollowView.onError(f)))
       }
     } merge
   }
 
   def getFollowers() = Action { implicit request: Request[AnyContent] =>
-    val view = new FollowView
-    (tokenFilter.checkUserToken() match {
-      case Success(user) => Right(followTable.follower(user))
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+    // val view = new FollowView
+    (TokenFilter.checkUserToken() match {
+      case Success(user) => Right(FollowsTable.follower(user))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
+      case Failure(e) => Left(InternalServerError(FollowView.onError(e)))
     }) flatMap {
-      case Success(users) => Right(Ok(view.showUsers(users)))
-      case Failure(f) => Left(InternalServerError(view.onError(f)))
+      case Success(users) => Right(Ok(FollowView.showUsers(users)))
+      case Failure(f) => Left(InternalServerError(FollowView.onError(f)))
     } merge
   }
 
   def getFollowees() = Action { implicit request: Request[AnyContent] =>
-    val view = new FollowView
-    (tokenFilter.checkUserToken() match {
-      case Success(user) => Right(followTable.followee(user))
-      case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
-      case Failure(e) => Left(InternalServerError(view.onError(e)))
+    // val view = new FollowView
+    (TokenFilter.checkUserToken() match {
+      case Success(user) => Right(FollowsTable.followee(user))
+      case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
+      case Failure(e) => Left(InternalServerError(FollowView.onError(e)))
     }) flatMap {
-      case Success(users) => Right(Ok(view.showUsers(users)))
-      case Failure(f) => Left(InternalServerError(view.onError(f)))
+      case Success(users) => Right(Ok(FollowView.showUsers(users)))
+      case Failure(f) => Left(InternalServerError(FollowView.onError(f)))
     } merge
   }
 

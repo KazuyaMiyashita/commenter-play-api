@@ -8,7 +8,7 @@ import v0._
 import models.entities.Comment
 import models.forms.CommentForm
 
-class CommentView(implicit messageProvider: MessagesProvider) {
+object CommentView {
 
   def showComments(comments: Seq[Comment]): JsValue = {
     Json.arr(
@@ -27,7 +27,7 @@ class CommentView(implicit messageProvider: MessagesProvider) {
     "error" -> error.toString
   )
 
-  def onFormError(badForm: Form[CommentForm]): JsValue = {
+  def onFormError(badForm: Form[CommentForm])(implicit messageProvider: MessagesProvider): JsValue = {
     Json.obj(
       "error" -> badForm.errorsAsJson
     )
