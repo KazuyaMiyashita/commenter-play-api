@@ -31,8 +31,8 @@ class AuthsController @Inject()(implicit config: Configuration, cc: ControllerCo
       case Left(badForm) => Left(BadRequest(SaveView.onFormError(badForm)))
     }) flatMap {
       case Success(_) => Right(Ok)
-      case Failure(f: java.sql.SQLIntegrityConstraintViolationException) => Left(Conflict(SaveView.onError(f)))
-      case Failure(f) => Left(InternalServerError(SaveView.onError(f)))
+      case Failure(e: AuthDuplicateException) => Left(Conflict(SaveView.onError(e)))
+      case Failure(e) => Left(InternalServerError(SaveView.onError(e)))
     } merge
   }
 

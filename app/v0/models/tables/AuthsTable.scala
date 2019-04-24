@@ -14,6 +14,7 @@ import v0.models.forms.{CreateUserForm, AuthLoginForm}
 
 
 class AuthsTableException extends Exception
+class AuthDuplicateException extends AuthsTableException
 class NonExistUserException(username: String) extends AuthsTableException
 class InvalidPasswordException extends AuthsTableException
 
@@ -21,18 +22,22 @@ object AuthsTable {
 
   implicit val session = AutoSession
 
-  def save(form: CreateUserForm)(implicit config: Configuration): Try[Unit] = Try {
-    Table.getConnectionPool(config)
+  def save(form: CreateUserForm)(implicit config: Configuration): Try[Unit] = {
+    Try {
+      Table.getConnectionPool(config)
 
-    val auth_id: String = createULID()
-    val email = form.email
-    val hashedPassword = createHash(form.rawPassword)
-    val user_id: String = createULID()
-    val name = form.name
-    sql"insert into auths (id, email, password) values (${auth_id}, ${email}, ${hashedPassword})"
-      .update.apply()
-    sql"insert into users (id, auth_id, name) values (${user_id}, ${auth_id}, ${name})"
-      .update.apply()
+      val auth_id: String = createULID()
+      val email = form.email
+      val hashedPassword = createHash(form.rawPassword)
+      val user_id: String = createULID()
+      val name = form.name
+      val _ = sql"insert into auths (id, email, password) values (${auth_id}, ${email}, ${hashedPassword})"
+        .update.apply()
+      val __ = sql"insert into users (id, auth_id, name) values (${user_id}, ${auth_id}, ${name})"
+        .update.apply()
+    } recoverWith(Table.handleMySQLError) {
+      case e: ER_DUP_ENTRY => Failure(new AuthDuplicateException)
+    }
   }
 
   def login(form: AuthLoginForm)(implicit config: Configuration): Try[String] = {
