@@ -36,7 +36,8 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
       }) flatMap {
         case Success(_) => Right(Ok)
         case Failure(f: FollowMyselfException) => Left(BadRequest(view.onError(f)))
-        case Failure(f: java.sql.SQLIntegrityConstraintViolationException) => Left(Conflict(view.onError(f)))
+        case Failure(f: FollowNonExistUserException) => Left(NotFound(view.onError(f)))
+        case Failure(f: FollowDuplicateException) => Left(Conflict(view.onError(f)))
         case Failure(f) => Left(InternalServerError(view.onError(f)))
       }
     } merge

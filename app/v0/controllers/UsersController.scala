@@ -24,7 +24,7 @@ class UsersController @Inject()(config: Configuration, cc: ControllerComponents)
     Ok("v0.UsersController.get")
   }
 
-  def getMyDetails() = Action { implicit request: Request[AnyContent] =>
+  def getMe() = Action { implicit request: Request[AnyContent] =>
     val userView = new UserView
     (tokenFilter.checkUserToken() match {
       case Success(user) => Right(user)

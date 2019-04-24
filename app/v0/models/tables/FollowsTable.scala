@@ -9,7 +9,7 @@ import util.{Try, Success, Failure}
 import v0.models.entities.User
 import v0.models.forms.FollowForm
 
-class FollowsTable(private val config: Configuration) {
+class FollowsTable(private val config: Configuration) extends Table {
 
   ConnectionPool.singleton(
     config.get[String]("db.url"),
@@ -26,8 +26,11 @@ class FollowsTable(private val config: Configuration) {
     
     if (follower == followee) Failure(new FollowMyselfException)
     else Try {
-      sql"insert into follows (follower, followee) values (${follower}, ${followee})"
+      val _ = sql"insert into follows (follower, followee) values (${follower}, ${followee})"
         .update.apply()
+    } recoverWith(Table.handleMySQLError) {
+      case e: ER_DUP_ENTRY => Failure(new FollowDuplicateException)
+      case e: ER_NO_REFERENCED_ROW_2 => Failure(new FollowNonExistUserException)
     }
   }
 
@@ -53,10 +56,12 @@ class FollowsTable(private val config: Configuration) {
 
 }
 
-class FollowsTableException extends Exception
+trait FollowsTableException extends Exception
 class FollowMyselfException extends FollowsTableException
+class FollowDuplicateException extends FollowsTableException
+class FollowNonExistUserException extends FollowsTableException
 
-object FollowsTable {
+object FollowsTable extends Table {
   
   def toUserEntity(rs: WrappedResultSet): User = User (
     id = rs.get("id"),
