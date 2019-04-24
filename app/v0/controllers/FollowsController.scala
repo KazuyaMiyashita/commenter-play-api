@@ -21,7 +21,6 @@ class FollowsController @Inject()(implicit config: Configuration, cc: Controller
   extends AbstractController(cc) with I18nSupport {
 
   def follow() = Action { implicit request: Request[AnyContent] => 
-    // val view = new FollowView
     (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
       case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
@@ -41,7 +40,6 @@ class FollowsController @Inject()(implicit config: Configuration, cc: Controller
   }
 
   def getFollowers() = Action { implicit request: Request[AnyContent] =>
-    // val view = new FollowView
     (TokenFilter.checkUserToken() match {
       case Success(user) => Right(FollowsTable.follower(user))
       case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
@@ -53,7 +51,6 @@ class FollowsController @Inject()(implicit config: Configuration, cc: Controller
   }
 
   def getFollowees() = Action { implicit request: Request[AnyContent] =>
-    // val view = new FollowView
     (TokenFilter.checkUserToken() match {
       case Success(user) => Right(FollowsTable.followee(user))
       case Failure(e: TokenFilterException) => Left(Unauthorized(FollowView.onError(e)))
