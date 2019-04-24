@@ -5,11 +5,8 @@ import play.api.libs.json._
 import play.api.i18n.MessagesProvider
 
 import v0._
+import views.View
 
-object LogoutView {
-
-  def onError(error: Throwable)(implicit messageProvider: MessagesProvider): JsValue = Json.obj(
-    "error" -> error.toString
-  )
+object LogoutView extends View {
 
 }

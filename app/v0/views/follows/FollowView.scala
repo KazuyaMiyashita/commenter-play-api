@@ -5,10 +5,11 @@ import play.api.libs.json._
 import play.api.i18n.MessagesProvider
 
 import v0._
+import views.View
 import models.entities.User
 import models.forms.FollowForm
 
-object FollowView {
+object FollowView extends View {
 
   def showUsers(users: Seq[User]): JsValue = {
     Json.arr(
@@ -20,15 +21,5 @@ object FollowView {
       }
     )
   }
-
-  def onFormError(badForm: Form[FollowForm])(implicit messageProvider: MessagesProvider): JsValue = {
-    Json.obj(
-      "error" -> badForm.errorsAsJson
-    )
-  }
-
-  def onError(error: Throwable): JsValue = Json.obj(
-    "error" -> error.toString
-  )
 
 }
