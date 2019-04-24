@@ -7,5 +7,3 @@ target
 /.settings
 /RUNNING_PID
 
-# Docker
-# /docker/mysql/*
