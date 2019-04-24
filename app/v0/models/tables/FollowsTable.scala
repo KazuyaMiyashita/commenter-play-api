@@ -9,18 +9,18 @@ import util.{Try, Success, Failure}
 import v0.models.entities.User
 import v0.models.forms.FollowForm
 
-class FollowsTable(private val config: Configuration) extends Table {
 
-  ConnectionPool.singleton(
-    config.get[String]("db.url"),
-    config.get[String]("db.username"),
-    config.get[String]("db.password")
-  )
+trait FollowsTableException extends Exception
+class FollowMyselfException extends FollowsTableException
+class FollowDuplicateException extends FollowsTableException
+class FollowNonExistUserException extends FollowsTableException
+
+object FollowsTable extends Table {
+
   implicit val session = AutoSession
 
-  import FollowsTable._
-
-  def follow(mine: User, followForm: FollowForm): Try[Unit] = {
+  def follow(mine: User, followForm: FollowForm)(config: Configuration): Try[Unit] = {
+    getConnectionPool(config)
     val follower: String = mine.id
     val followee: String = followForm.followee
     
@@ -34,7 +34,8 @@ class FollowsTable(private val config: Configuration) extends Table {
     }
   }
 
-  def follower(user: User): Try[List[User]] = Try {
+  def follower(user: User)(config: Configuration): Try[List[User]] = Try {
+    getConnectionPool(config)
     sql"""
       select id, name from users as u
         inner join follows as f
@@ -44,7 +45,8 @@ class FollowsTable(private val config: Configuration) extends Table {
       .map(rs => toUserEntity(rs)).list.apply()
   }
 
-  def followee(user: User): Try[List[User]] = Try {
+  def followee(user: User)(config: Configuration): Try[List[User]] = Try {
+    getConnectionPool(config)
     sql"""
       select id, name from users as u
         inner join follows as f
@@ -54,14 +56,14 @@ class FollowsTable(private val config: Configuration) extends Table {
       .map(rs => toUserEntity(rs)).list.apply()
   }
 
-}
 
-trait FollowsTableException extends Exception
-class FollowMyselfException extends FollowsTableException
-class FollowDuplicateException extends FollowsTableException
-class FollowNonExistUserException extends FollowsTableException
-
-object FollowsTable extends Table {
+  def getConnectionPool(config: Configuration) {
+    ConnectionPool.singleton(
+      config.get[String]("db.url"),
+      config.get[String]("db.username"),
+      config.get[String]("db.password")
+    )
+  }
   
   def toUserEntity(rs: WrappedResultSet): User = User (
     id = rs.get("id"),

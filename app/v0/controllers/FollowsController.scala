@@ -21,7 +21,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
   extends AbstractController(cc) with I18nSupport {
 
   val tokenFilter = new TokenFilter(config)
-  val followTable = new FollowsTable(config)
+  // val followTable = new FollowsTable(config)
 
   def follow() = Action { implicit request: Request[AnyContent] => 
     val view = new FollowView
@@ -31,7 +31,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
       case Failure(e) => Left(InternalServerError(view.onError(e)))
     }) flatMap {
       user => (bindFromRequest(FollowForm.form) match {
-        case Right(form) => Right(followTable.follow(user, form))
+        case Right(form) => Right(FollowsTable.follow(user, form)(config))
         case Left(badForm) => Left(BadRequest(view.onFormError(badForm)))
       }) flatMap {
         case Success(_) => Right(Ok)
@@ -46,7 +46,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
   def getFollowers() = Action { implicit request: Request[AnyContent] =>
     val view = new FollowView
     (tokenFilter.checkUserToken() match {
-      case Success(user) => Right(followTable.follower(user))
+      case Success(user) => Right(FollowsTable.follower(user)(config))
       case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
       case Failure(e) => Left(InternalServerError(view.onError(e)))
     }) flatMap {
@@ -58,7 +58,7 @@ class FollowsController @Inject()(config: Configuration, cc: ControllerComponent
   def getFollowees() = Action { implicit request: Request[AnyContent] =>
     val view = new FollowView
     (tokenFilter.checkUserToken() match {
-      case Success(user) => Right(followTable.followee(user))
+      case Success(user) => Right(FollowsTable.followee(user)(config))
       case Failure(e: TokenFilterException) => Left(Unauthorized(view.onError(e)))
       case Failure(e) => Left(InternalServerError(view.onError(e)))
     }) flatMap {
