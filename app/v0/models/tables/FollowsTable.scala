@@ -29,8 +29,8 @@ class FollowsTable(private val config: Configuration) extends Table {
       val _ = sql"insert into follows (follower, followee) values (${follower}, ${followee})"
         .update.apply()
     } recoverWith(Table.handleMySQLError) {
-      case e: ER_DUP_ENTRY => Failure(new FollowDuplicateException)
       case e: ER_NO_REFERENCED_ROW_2 => Failure(new FollowNonExistUserException)
+      case e: ER_DUP_ENTRY => Failure(new FollowDuplicateException)
     }
   }
 
