@@ -13,7 +13,7 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1
 libraryDependencies += "org.springframework.security" % "spring-security-web" % "5.1.5.RELEASE"
 
 libraryDependencies ++= Seq(
-  "mysql" % "mysql-connector-java" % "8.0.15",
+  "mysql" % "mysql-connector-java" % "8.0.16",
   "org.scalikejdbc" %% "scalikejdbc" % "3.3.2",
   "ch.qos.logback" % "logback-classic" % "1.2.3"
 )

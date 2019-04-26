@@ -52,7 +52,7 @@ create table if not exists `follows`
 (
   `follower`    char(64) not null,
   `followee`    char(64) not null,
-  # check (`follower` <> `followee`), # mysql8.0.16から利用できる(現在8.0.15)
+  check (`follower` <> `followee`),
   index (`follower`),
   index (`followee`),
   primary key (`follower`, `followee`),
