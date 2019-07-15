@@ -16,13 +16,16 @@ import models.tables._
 import views.comments._
 import utils.ControllerUtils._
 import filters._
-
+import v0.controllers.actions.TokenActionFilter
+import v0.controllers.actions.LoggingAction
 
 @Singleton
-class CommentsController @Inject()(implicit config: Configuration, cc: ControllerComponents)
+class CommentsController @Inject()
+  (tokenActionFilter: TokenActionFilter, loggingAction: LoggingAction)
+  (implicit config: Configuration, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
 
-  def get() = Action { implicit request: Request[AnyContent] =>
+  def get() = tokenActionFilter { implicit request: Request[AnyContent] =>
     (TokenFilter.checkUserToken() match {
       case Success(user) => Right(user)
       case Failure(e: TokenFilterException) => Left(Unauthorized(CommentView.onError(e)))
